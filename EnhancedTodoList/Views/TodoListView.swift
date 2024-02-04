@@ -9,6 +9,8 @@ import SwiftUI
 
 struct TodoListView: View {
     // MARK: Stored properties
+    @State private var searchText = ""
+    @State private var searchIsActive = false
     
     // The item currently being created
     @State private var newItemDetails = ""
@@ -16,8 +18,16 @@ struct TodoListView: View {
     // Our list of items to complete
     @State private var items: [TodoItem] = []
     
-    //Count number
-    @State private var count: [Int] = [1]
+    //Search
+    var filteredItems: [TodoItem] {
+        if searchText.isEmpty {
+            return items
+        } else {
+            return items.filter { item in
+                item.details.lowercased().contains(searchText.lowercased())
+            }
+        }
+    }
     // MARK: Computed properties
     var body: some View {
         NavigationStack {
@@ -46,21 +56,22 @@ struct TodoListView: View {
                     })
                     
                 } else {
-                    
-                    List(items) { currentItem in
-                        ForEach(count, id: \.self){ c in
-                            Label {
-                                Text(currentItem.details)
-                            } icon: {
-                                Image(systemName: currentItem.isCompleted ? "checkmark.circle" : "circle")
-                                    .onTapGesture {
-                                        toggle(item: currentItem)
-                                    }
-                            }
+                    List{
+                        ForEach(filteredItems) { currentItem in
+                           
+                                Label {
+                                    Text(currentItem.details)
+                                } icon: {
+                                    Image(systemName: currentItem.isCompleted ? "checkmark.circle" : "circle")
+                                        .onTapGesture {
+                                            toggle(item: currentItem)
+                                        }
+                                }
+                            
+                           
                         }
                         .onDelete(perform: removeRows)
                     }
-                    
                 }
             }
             .onAppear {
@@ -70,6 +81,7 @@ struct TodoListView: View {
                 }
             }
         }
+        .searchable(text: $searchText, isPresented: $searchIsActive)
     }
     
     // MARK: Functions
