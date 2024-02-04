@@ -6,8 +6,13 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct TodoListView: View {
+    
+    // Access the model context so we can "CRUD" data
+    @Environment(\.modelContext) private var modelContext
+    
     // MARK: Stored properties
     @State private var searchText = ""
     @State private var searchIsActive = false
@@ -15,8 +20,8 @@ struct TodoListView: View {
     // The item currently being created
     @State private var newItemDetails = ""
     
-    // Our list of items to complete
-    @State private var items: [TodoItem] = []
+    // Run a query to obtain the list of to-do items
+    @Query private var items: [TodoItem]
     
     //Search
     var filteredItems: [TodoItem] {
@@ -74,12 +79,6 @@ struct TodoListView: View {
                     }
                 }
             }
-            .onAppear {
-                // Populate with example data
-                if items.isEmpty {
-                    // items.append(contentsOf: exampleData)
-                }
-            }
         }
         .searchable(text: $searchText, isPresented: $searchIsActive)
     }
@@ -87,7 +86,7 @@ struct TodoListView: View {
     // MARK: Functions
     func addItem() {
         let newToDoItem = TodoItem(details: newItemDetails)
-        items.insert(newToDoItem, at: 0)
+        modelContext.insert(newToDoItem)
         newItemDetails = ""
     }
     
@@ -102,7 +101,10 @@ struct TodoListView: View {
     }
     
     func removeRows(at offsets: IndexSet) {
-        items.remove(atOffsets: offsets)
+        for offset in offsets{
+            modelContext.delete(items[offset])
+        }
+        
     }
 
 }
