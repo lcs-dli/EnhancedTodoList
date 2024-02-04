@@ -16,6 +16,8 @@ struct TodoListView: View {
     // Our list of items to complete
     @State private var items: [TodoItem] = []
     
+    //Count number
+    @State private var count: [Int] = [1]
     // MARK: Computed properties
     var body: some View {
         NavigationStack {
@@ -46,14 +48,17 @@ struct TodoListView: View {
                 } else {
                     
                     List(items) { currentItem in
-                        Label {
-                            Text(currentItem.details)
-                        } icon: {
-                            Image(systemName: currentItem.isCompleted ? "checkmark.circle" : "circle")
-                                .onTapGesture {
-                                    toggle(item: currentItem)
-                                }
+                        ForEach(count, id: \.self){ c in
+                            Label {
+                                Text(currentItem.details)
+                            } icon: {
+                                Image(systemName: currentItem.isCompleted ? "checkmark.circle" : "circle")
+                                    .onTapGesture {
+                                        toggle(item: currentItem)
+                                    }
+                            }
                         }
+                        .onDelete(perform: removeRows)
                     }
                     
                 }
@@ -82,7 +87,10 @@ struct TodoListView: View {
             item.completedOn = Date()
             item.isCompleted = true
         }
-        
+    }
+    
+    func removeRows(at offsets: IndexSet) {
+        items.remove(atOffsets: offsets)
     }
 
 }
